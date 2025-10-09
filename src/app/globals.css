@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* White */
+    --foreground: 0 0% 3.9%; /* Black */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 3.9%; /* Black */
+    --primary-foreground: 0 0% 100%; /* White */
+    --secondary: 0 0% 96.1%; /* Light Gray */
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%; /* Medium Gray */
+    --accent: 0 0% 96.1%; /* Light Gray */
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%; /* Gray border */
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%; /* Black */
+    --foreground: 0 0% 100%; /* White */
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 98%; /* White */
+    --primary-foreground: 0 0% 9%; /* Black */
+    --secondary: 0 0% 14.9%; /* Dark Gray */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%; /* Medium Gray */
+    --accent: 0 0% 14.9%; /* Dark Gray */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%; /* Darker Gray Border */
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+  
+  /* Shared animation properties */
+  .festival-element {
+    position: absolute;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  /* Diwali Animations */
+  .diwali-sparkle {
+    width: 4px;
+    height: 4px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 15px #FFD700;
+    animation: sparkle-anim 2s infinite;
+  }
+  .diwali-diya {
+    width: 40px;
+    height: 20px;
+    animation: float-diya 15s infinite ease-in-out;
+  }
+  @keyframes sparkle-anim {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.5); opacity: 0.5; }
+  }
+  @keyframes float-diya {
+    0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    50% { transform: translateY(-30px) translateX(20px) rotate(5deg); }
+  }
+
+  /* Holi Animations */
+  .holi-powder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    animation: holi-float 8s infinite ease-in-out;
+    filter: blur(10px);
+  }
+  @keyframes holi-float {
+    0% { transform: translateY(20px) translateX(0) scale(0.1); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.7; }
+    100% { transform: translateY(-200px) translateX(50px) scale(1.2); opacity: 0; }
+  }
+
+  /* Navratri Animations */
+  .navratri-garland {
+    animation: sway 5s infinite ease-in-out;
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-1.5deg); }
+    50% { transform: rotate(1.5deg); }
+  }
+  .navratri-light {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: blink 2s infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; }
+    50% { opacity: 0.4; box-shadow: 0 0 4px currentColor; }
+  }
+
+  /* Shared "falling" animation */
+  @keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* Independence/Republic Day Animations */
+  .tricolor-firework {
+    width: 2px;
+    height: 50px;
+    transform-origin: bottom;
+    animation: firework-burst 1.5s ease-out forwards;
+  }
+  @keyframes firework-burst {
+    0% { transform: scaleY(0); opacity: 0; }
+    50% { transform: scaleY(1); opacity: 1; }
+    100% { transform: scaleY(1) translateY(-20px); opacity: 0; }
+  }
+
+  /* Eid Animations */
+  .eid-lantern {
+    animation: float-lantern 20s infinite ease-in-out;
+  }
+  @keyframes float-lantern {
+    0%, 100% { transform: translateY(0) rotate(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    50% { transform: translateY(-50px) rotate(5deg); }
+    90% { opacity: 0.8; }
+  }
+
+  /* Raksha Bandhan Animations */
+  .rakhi-thread {
+    animation: float-rakhi 15s infinite linear;
+  }
+  @keyframes float-rakhi {
+    0% { transform: translateX(-10vw) rotate(0deg); opacity: 0.8; }
+    100% { transform: translateX(110vw) rotate(180deg); opacity: 0.8; }
+  }
+
+  /* Makar Sankranti Animations */
+  .sankranti-kite {
+    animation: fly-kite 25s infinite ease-in-out;
+  }
+  @keyframes fly-kite {
+    0%, 100% { transform: translateY(20px) translateX(-20px) rotate(-10deg); }
+    50% { transform: translateY(-20px) translateX(20px) rotate(10deg); }
+  }
+}
+
+@layer components {
+    .link-underline {
+        @apply relative;
+    }
+    .link-underline::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        transform: scaleX(0);
+        height: 1px;
+        bottom: -2px;
+        left: 0;
+        background-color: currentColor;
+        transform-origin: bottom right;
+        transition: transform 0.25s ease-out;
+    }
+    .link-underline:hover::after {
+        transform: scaleX(1);
+        transform-origin: bottom left;
+    }
+}
