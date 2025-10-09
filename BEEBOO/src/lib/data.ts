@@ -56,14 +56,31 @@ export const getProducts = async (filters: {
     const allProductsSnapshot = await productsQuery.get();
     let allProducts = allProductsSnapshot.docs.map(productFromDoc);
     
-    return allProducts.filter(p => 
+    // Then filter by search term in-memory
+    let searchedProducts = allProducts.filter(p => 
         p.title.toLowerCase().includes(searchTerm) || 
         p.description.toLowerCase().includes(searchTerm) ||
         p.category.toLowerCase().includes(searchTerm)
     );
+     // Apply sorting after search
+      const sort = filters.sort || 'newest';
+      switch (sort) {
+        case 'price-asc':
+          searchedProducts.sort((a, b) => a.final_price - b.final_price);
+          break;
+        case 'price-desc':
+          searchedProducts.sort((a, b) => b.final_price - a.final_price);
+          break;
+        case 'newest':
+        default:
+          searchedProducts.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+          break;
+      }
+      return searchedProducts;
   }
 
   // Apply limit ONLY if it's explicitly provided (for home page sections).
+  // If no limit is provided, this part is skipped, and all products from the query are fetched.
   if (filters.limit) {
     productsQuery = productsQuery.limit(filters.limit);
   }
@@ -71,7 +88,7 @@ export const getProducts = async (filters: {
   const querySnapshot = await productsQuery.get();
   let products = querySnapshot.docs.map(productFromDoc);
   
-  // Apply sorting in-memory
+  // Apply sorting in-memory for consistency across all fetches
   const sort = filters.sort || 'newest';
   switch (sort) {
       case 'price-asc':
