@@ -48,19 +48,28 @@ export const getProducts = async (filters: {
     productsQuery = productsQuery.where('category', '==', filters.category);
   }
   
-  const querySnapshot = await productsQuery.get();
-  let products = querySnapshot.docs.map(productFromDoc);
-  
-  // Apply search filtering in-memory
+  // For search, we must fetch all and filter in memory since Firestore doesn't support
+  // multi-field text search natively.
   if (filters.search) {
     const searchTerm = filters.search.toLowerCase();
-    products = products.filter(p => 
+    const allProductsSnapshot = await productsQuery.get();
+    let allProducts = allProductsSnapshot.docs.map(productFromDoc);
+    
+    return allProducts.filter(p => 
         p.title.toLowerCase().includes(searchTerm) || 
         p.description.toLowerCase().includes(searchTerm) ||
         p.category.toLowerCase().includes(searchTerm)
     );
   }
 
+  // Apply limit ONLY if it's explicitly provided. Otherwise, fetch all.
+  if (filters.limit) {
+    productsQuery = productsQuery.limit(filters.limit);
+  }
+  
+  const querySnapshot = await productsQuery.get();
+  let products = querySnapshot.docs.map(productFromDoc);
+  
   // Apply sorting in-memory
   const sort = filters.sort || 'newest';
   switch (sort) {
@@ -74,11 +83,6 @@ export const getProducts = async (filters: {
       default:
           products.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
           break;
-  }
-
-  // Apply limit only if it's explicitly provided
-  if (filters.limit) {
-    products = products.slice(0, filters.limit);
   }
 
   return products;
@@ -104,11 +108,11 @@ export const getFeaturedProducts = async (limitCount?: number): Promise<Product[
     let productsQuery: admin.firestore.Query = adminDb.collection('products')
         .where('featured', '==', true)
         .orderBy('createdAt', 'desc');
-
+    
+    // Shuffle the featured products array for variety
     const querySnapshot = await productsQuery.get();
     let featuredProducts = querySnapshot.docs.map(productFromDoc);
     
-    // Shuffle the featured products array
     for (let i = featuredProducts.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [featuredProducts[i], featuredProducts[j]] = [featuredProducts[j], featuredProducts[i]];
