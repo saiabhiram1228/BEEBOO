@@ -47,33 +47,10 @@ export const getProducts = async (filters: {
   if (filters.category && filters.category !== 'all') {
     productsQuery = productsQuery.where('category', '==', filters.category);
   }
-<<<<<<< HEAD
   
-=======
-
-  // Apply sorting *after* fetching if it's a default sort, to avoid index issues.
-  if (filters.sort) {
-     if (filters.sort === 'price-asc') {
-      productsQuery = productsQuery.orderBy('final_price', 'asc');
-    } else if (filters.sort === 'price-desc') {
-      productsQuery = productsQuery.orderBy('final_price', 'desc');
-    } else {
-      productsQuery = productsQuery.orderBy('createdAt', 'desc');
-    }
-  } else {
-     productsQuery = productsQuery.orderBy('createdAt', 'desc');
-  }
-
-
-  if (filters.limit) {
-    productsQuery = productsQuery.limit(filters.limit);
-  }
-
->>>>>>> 2bd9d7a (Try fixing this error: `Runtime Error: Error: 9 FAILED_PRECONDITION: The)
   const querySnapshot = await productsQuery.get();
   let products = querySnapshot.docs.map(productFromDoc);
   
-<<<<<<< HEAD
   // Apply search filtering in-memory
   if (filters.search) {
     const searchTerm = filters.search.toLowerCase();
@@ -102,25 +79,6 @@ export const getProducts = async (filters: {
   // Apply limit after sorting
   if (filters.limit) {
     products = products.slice(0, filters.limit);
-=======
-  // Apply sorting in-memory if it wasn't handled by the query
-  const sort = filters.sort || 'newest';
-  if (sort) {
-      products.sort((a, b) => {
-          switch (sort) {
-              case 'price-asc':
-                  return a.final_price - b.final_price;
-              case 'price-desc':
-                  return b.final_price - a.final_price;
-              case 'newest':
-              default:
-                   // Ensure createdAt is valid for sorting
-                  const dateA = a.createdAt ? a.createdAt.getTime() : 0;
-                  const dateB = b.createdAt ? b.createdAt.getTime() : 0;
-                  return dateB - dateA;
-          }
-      });
->>>>>>> 2bd9d7a (Try fixing this error: `Runtime Error: Error: 9 FAILED_PRECONDITION: The)
   }
 
   return products;
