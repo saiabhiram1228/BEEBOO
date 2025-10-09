@@ -13,23 +13,23 @@ export default function Footer() {
   return (
     <footer className="bg-primary/5 border-t">
       <div className="container mx-auto py-6 px-4 md:px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-          <p className="text-muted-foreground shrink-0">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-x-6 gap-y-4 text-sm">
+          <p className="text-muted-foreground shrink-0 text-center md:text-left">
             © {new Date().getFullYear()} BEE BOO. All Rights Reserved.
           </p>
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-foreground/80">
+          <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2">
             {policyLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-primary transition-colors"
+                className="text-foreground/80 hover:text-primary hover:underline transition-colors"
               >
                 {link.name}
               </Link>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
     </footer>
