@@ -52,6 +52,7 @@ export const getProducts = async (filters: {
   // multi-field text search natively.
   if (filters.search) {
     const searchTerm = filters.search.toLowerCase();
+    // When searching, apply category filter before fetching all documents of that category
     const allProductsSnapshot = await productsQuery.get();
     let allProducts = allProductsSnapshot.docs.map(productFromDoc);
     
@@ -62,7 +63,7 @@ export const getProducts = async (filters: {
     );
   }
 
-  // Apply limit ONLY if it's explicitly provided. Otherwise, fetch all.
+  // Apply limit ONLY if it's explicitly provided (for home page sections).
   if (filters.limit) {
     productsQuery = productsQuery.limit(filters.limit);
   }

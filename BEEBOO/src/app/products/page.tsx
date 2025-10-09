@@ -30,7 +30,7 @@ function ProductGrid() {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      // Fetch all products, no limit.
+      // Fetch all products matching filters, with no limit.
       const fetchedProducts = await getProducts({ category, sort, search });
       setProducts(fetchedProducts);
       setLoading(false);
