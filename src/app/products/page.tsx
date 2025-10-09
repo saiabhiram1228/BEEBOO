@@ -11,10 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useRouter, usePathname } from 'next/navigation';
 import type { Category, Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-const PRODUCTS_PER_PAGE = 8;
+import { ShoppingBag } from 'lucide-react';
 
 function ProductGrid() {
   const searchParams = useSearchParams();
@@ -33,11 +30,11 @@ function ProductGrid() {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+      // Fetch all products matching filters, with no limit.
       const fetchedProducts = await getProducts({ 
         category, 
         sort, 
         search,
-        limit: PRODUCTS_PER_PAGE,
       });
       setProducts(fetchedProducts);
       setLoading(false);
@@ -97,7 +94,7 @@ function ProductGrid() {
       </div>
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="space-y-2">
                     <Skeleton className="aspect-[4/5]" />
                     <Skeleton className="h-5 w-3/4" />

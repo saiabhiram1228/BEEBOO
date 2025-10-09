@@ -48,10 +48,17 @@ export const getProducts = async (filters: {
     productsQuery = productsQuery.where('category', '==', filters.category);
   }
   
+  // Apply limit if it's provided (for homepage sections)
+  if (filters.limit) {
+    productsQuery = productsQuery.limit(filters.limit);
+  }
+  
   const querySnapshot = await productsQuery.get();
   let products = querySnapshot.docs.map(productFromDoc);
   
   // Apply search filtering in-memory
+  // This is done after the initial query. If a limit was applied, search runs on that limited set.
+  // If no limit was applied, it runs on all category products.
   if (filters.search) {
     const searchTerm = filters.search.toLowerCase();
     products = products.filter(p => 
@@ -75,11 +82,10 @@ export const getProducts = async (filters: {
           products.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
           break;
   }
-
-  // Apply limit after sorting
-  if (filters.limit) {
-    products = products.slice(0, filters.limit);
-  }
+  
+  // Note: The limit is now applied at the query level for Firestore efficiency,
+  // but if search is used, the final count might be less than the limit.
+  // If no limit is passed, all products from the category are fetched and then sorted.
 
   return products;
 };
