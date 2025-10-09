@@ -30,6 +30,7 @@ function ProductGrid() {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+      // Fetch all products, no limit.
       const fetchedProducts = await getProducts({ category, sort, search });
       setProducts(fetchedProducts);
       setLoading(false);
@@ -55,14 +56,14 @@ function ProductGrid() {
   return (
     <div className="container mx-auto px-4 md:px-6 py-8">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-bold font-headline">
+        <h1 className="text-3xl font-bold font-headline text-center md:text-left">
           {search ? `Searching for "${search}"` : (allCategories.find(c => c.id === category)?.name || 'All Products')}
         </h1>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="category-select">Category:</Label>
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full">
+            <Label htmlFor="category-select" className="whitespace-nowrap">Category:</Label>
             <Select value={category} onValueChange={(value) => handleFilterChange('category', value)}>
-              <SelectTrigger id="category-select" className="w-[150px]">
+              <SelectTrigger id="category-select" className="w-full">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -72,10 +73,10 @@ function ProductGrid() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="sort-select">Sort by:</Label>
+          <div className="flex items-center gap-2 w-full">
+            <Label htmlFor="sort-select" className="whitespace-nowrap">Sort by:</Label>
             <Select value={sort} onValueChange={(value) => handleFilterChange('sort', value)}>
-              <SelectTrigger id="sort-select" className="w-[180px]">
+              <SelectTrigger id="sort-select" className="w-full">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -108,9 +109,9 @@ function ProductGrid() {
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-2xl font-semibold">Oops! Nothing here yet.</h2>
             <p className="text-muted-foreground mt-2">
-                It looks like we couldn't find any products matching your search.
+                It looks like we couldn't find any products matching your filters.
                 <br/>
-                New styles are coming soon — stay tuned 💫
+                Try adjusting your search or filters.
             </p>
         </div>
       )}
@@ -120,7 +121,7 @@ function ProductGrid() {
 
 export default function ProductsPage() {
     return (
-      <Suspense fallback={<div>Loading filters...</div>}>
+      <Suspense fallback={<div className="container mx-auto px-4 md:px-6 py-8"><Skeleton className="h-96 w-full" /></div>}>
         <ProductGrid />
       </Suspense>
     )

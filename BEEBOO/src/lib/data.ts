@@ -36,45 +36,54 @@ export const getProducts = async (filters: {
   category?: string;
   sort?: string;
   search?: string;
+  limit?: number;
 } = {}): Promise<Product[]> => {
   await initAdmin();
   const adminDb = admin.firestore();
-  const productsRef = adminDb.collection('products');
-  let productsQuery: admin.firestore.Query = productsRef;
+  
+  let productsQuery: admin.firestore.Query = adminDb.collection('products');
 
-  // If there's a search term, we should ignore the category for a global search.
-  // Otherwise, filter by category if one is provided.
-  if (!filters.search && filters.category && filters.category !== 'all') {
+  // Apply category filter
+  if (filters.category && filters.category !== 'all') {
     productsQuery = productsQuery.where('category', '==', filters.category);
   }
-
+  
   const querySnapshot = await productsQuery.get();
   let products = querySnapshot.docs.map(productFromDoc);
-
-  // Apply search filtering in-memory on all fetched products
-  if (filters.search) {
-    products = products.filter(p => p.title.toLowerCase().includes(filters.search!.toLowerCase()));
-  }
   
+  // Apply search filtering in-memory
+  if (filters.search) {
+    const searchTerm = filters.search.toLowerCase();
+    products = products.filter(p => 
+        p.title.toLowerCase().includes(searchTerm) || 
+        p.description.toLowerCase().includes(searchTerm) ||
+        p.category.toLowerCase().includes(searchTerm)
+    );
+  }
+
   // Apply sorting in-memory
   const sort = filters.sort || 'newest';
-  products.sort((a, b) => {
-      switch (sort) {
-          case 'price-asc':
-              return a.final_price - b.final_price;
-          case 'price-desc':
-              return b.final_price - a.final_price;
-          case 'newest':
-          default:
-               // Ensure createdAt is valid for sorting
-              const dateA = a.createdAt ? a.createdAt.getTime() : 0;
-              const dateB = b.createdAt ? b.createdAt.getTime() : 0;
-              return dateB - dateA;
-      }
-  });
+  switch (sort) {
+      case 'price-asc':
+          products.sort((a, b) => a.final_price - b.final_price);
+          break;
+      case 'price-desc':
+          products.sort((a, b) => b.final_price - a.final_price);
+          break;
+      case 'newest':
+      default:
+          products.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+          break;
+  }
+
+  // Apply limit only if it's explicitly provided
+  if (filters.limit) {
+    products = products.slice(0, filters.limit);
+  }
 
   return products;
 };
+
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
   await initAdmin();
@@ -92,16 +101,22 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 export const getFeaturedProducts = async (limitCount?: number): Promise<Product[]> => {
     await initAdmin();
     const adminDb = admin.firestore();
-    const productsQuery = adminDb.collection('products').orderBy('createdAt', 'desc');
-    
-    const querySnapshot = await productsQuery.get();
-    const allProducts = querySnapshot.docs.map(productFromDoc);
-    
-    const featured = allProducts.filter(p => p.featured);
+    let productsQuery: admin.firestore.Query = adminDb.collection('products')
+        .where('featured', '==', true)
+        .orderBy('createdAt', 'desc');
 
+    const querySnapshot = await productsQuery.get();
+    let featuredProducts = querySnapshot.docs.map(productFromDoc);
+    
+    // Shuffle the featured products array
+    for (let i = featuredProducts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [featuredProducts[i], featuredProducts[j]] = [featuredProducts[j], featuredProducts[i]];
+    }
+    
     if (limitCount) {
-        return featured.slice(0, limitCount);
+        return featuredProducts.slice(0, limitCount);
     }
 
-    return featured;
+    return featuredProducts;
 };
