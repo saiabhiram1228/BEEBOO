@@ -12,17 +12,19 @@ export default function Footer() {
 
   return (
     <footer className="bg-primary/5 border-t">
-      <div className="container mx-auto py-8 px-4 md:px-6 flex flex-col items-center gap-4">
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            {policyLinks.map((link) => (
-                <Link key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                    {link.name}
-                </Link>
-            ))}
+      <div className="container mx-auto py-6 px-4 md:px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+            <p>
+              © {new Date().getFullYear()} BEE BOO. All Rights Reserved.
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+                {policyLinks.map((link) => (
+                    <Link key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                        {link.name}
+                    </Link>
+                ))}
+            </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-4">
-          © {new Date().getFullYear()} BEE BOO. All Rights Reserved.
-        </p>
       </div>
     </footer>
   );
