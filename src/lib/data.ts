@@ -123,10 +123,11 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
     await initAdmin();
     const adminDb = admin.firestore();
     const ordersRef = adminDb.collection('orders');
-    const q = ordersRef.where('userId', '==', userId).orderBy('createdAt', 'desc');
+    // Query for orders by user ID without sorting on the server
+    const q = ordersRef.where('userId', '==', userId);
     const querySnapshot = await q.get();
 
-    return querySnapshot.docs.map(doc => {
+    const orders = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
             id: doc.id,
@@ -134,4 +135,9 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
             createdAt: (data.createdAt as Timestamp).toDate(),
         } as Order;
     });
+
+    // Sort the orders by date in descending order in the code
+    orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    return orders;
 }
