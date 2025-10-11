@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCart } from '@/context/cart-context';
@@ -160,7 +161,7 @@ export default function CheckoutPage() {
             order_id: razorpayOrderId,
             handler: async function (paymentResponse: any) {
                 // Payment successful, now verify on server
-                toast({ title: "Payment Successful!", description: "Verifying and placing order..." });
+                toast({ title: "Payment Successful!", description: "Finalizing your order..." });
 
                 const verificationResult = await verifyPaymentAndUpdateOrder(
                     paymentResponse.razorpay_order_id,
@@ -173,7 +174,7 @@ export default function CheckoutPage() {
                     clearCart();
                     toast({
                         title: "Order Confirmed!",
-                        description: `Your order #${verificationResult.orderId?.substring(0, 6)} has been placed.`,
+                        description: "A confirmation will be sent to you shortly.",
                     });
                     router.push(`/order-confirmation?orderId=${verificationResult.orderId}&paymentId=${paymentResponse.razorpay_payment_id}`);
                 } else {

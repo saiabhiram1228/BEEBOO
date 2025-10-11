@@ -23,7 +23,7 @@ function OrderConfirmationContent() {
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground">
-                        Thank you for your order! Your order has been placed successfully. A confirmation email will be sent to you shortly.
+                        Your order has been placed successfully. A confirmation email will be sent to you shortly.
                     </p>
                     {orderId && (
                         <p className="mt-2 text-sm text-muted-foreground">
