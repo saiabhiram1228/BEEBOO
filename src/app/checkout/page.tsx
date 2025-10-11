@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCart } from '@/context/cart-context';
@@ -110,7 +109,7 @@ export default function CheckoutPage() {
     try {
         const idToken = await getIdToken(user);
         const orderPayload = {
-            cart: cart,
+            cart: cart.map(item => ({...item, productId: item.id})), // Pass full cart item details
             shippingDetails: data,
             total: cartTotal,
         };

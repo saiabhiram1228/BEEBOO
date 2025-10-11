@@ -1,4 +1,3 @@
-
 'use server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createOrderAndPayment } from '@/lib/order-actions';
@@ -21,6 +20,7 @@ const shippingDetailsSchema = z.object({
 const orderSchema = z.object({
   cart: z.array(z.object({
     id: z.string(),
+    productId: z.string(),
     name: z.string(),
     price: z.number(),
     image: z.string(),

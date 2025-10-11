@@ -1,4 +1,3 @@
-
 'use server';
 
 import Razorpay from 'razorpay';
@@ -6,6 +5,7 @@ import admin, { initAdmin } from './firebase/server';
 import { Timestamp } from 'firebase-admin/firestore';
 import type { CartItem, ShippingDetails, Order } from './types';
 import crypto from 'crypto';
+import { sendOrderConfirmationEmail } from './email';
 
 // This function now handles the full Razorpay flow without webhooks.
 export async function createOrderAndPayment(orderPayload: { cart: CartItem[], shippingDetails: ShippingDetails, total: number }, userId: string) {
@@ -30,6 +30,9 @@ export async function createOrderAndPayment(orderPayload: { cart: CartItem[], sh
             };
             const docRef = await adminDb.collection('orders').add({ ...simOrderData, createdAt: Timestamp.fromDate(simOrderData.createdAt) });
             
+             // Send confirmation email for simulated order
+            await sendOrderConfirmationEmail(shippingDetails, { id: docRef.id, ...simOrderData });
+
             return { data: { id: docRef.id, isDirectOrder: true }, error: null };
         }
 
@@ -62,7 +65,11 @@ export async function createOrderAndPayment(orderPayload: { cart: CartItem[], sh
             amount: amountInPaise,
             currency: 'INR',
             receipt: firestoreOrderId,
-            notes: { firestore_order_id: firestoreOrderId }
+            notes: { 
+                firestore_order_id: firestoreOrderId,
+                user_id: userId,
+            },
+            partial_payment: false,
         };
 
         const razorpayOrder = await razorpay.orders.create(options);
@@ -115,6 +122,9 @@ export async function verifyPaymentAndUpdateOrder(
     firestore_order_id: string
 ) {
     await initAdmin(); // Ensure Firebase is initialized
+    const adminDb = admin.firestore();
+    const orderRef = adminDb.collection('orders').doc(firestore_order_id);
+
     try {
         const secret = process.env.RAZORPAY_KEY_SECRET!;
         if (!secret) {
@@ -130,9 +140,14 @@ export async function verifyPaymentAndUpdateOrder(
             throw new Error('Payment verification failed: Invalid signature.');
         }
 
-        const adminDb = admin.firestore();
-        const orderRef = adminDb.collection('orders').doc(firestore_order_id);
+        // Fetch the order data to use for the email
+        const orderSnapshot = await orderRef.get();
+        if (!orderSnapshot.exists) {
+            throw new Error(`Order ${firestore_order_id} not found in Firestore.`);
+        }
+        const orderData = orderSnapshot.data() as Omit<Order, 'id'>;
 
+        // Update Firestore
         await orderRef.update({
             paymentStatus: 'paid',
             status: 'placed',
@@ -140,14 +155,21 @@ export async function verifyPaymentAndUpdateOrder(
             razorpaySignature: razorpay_signature,
         });
 
-        // The order is now updated in Firestore. The admin dashboard will see this change.
+        // Send confirmation email
+        await sendOrderConfirmationEmail(orderData.shippingAddress, {
+            id: firestore_order_id,
+            total: orderData.total,
+            products: orderData.products,
+            razorpayPaymentId: razorpay_payment_id,
+        });
+
 
         return { success: true, orderId: firestore_order_id };
     } catch (e: any) {
-        console.error("🔥 Payment verification/update failed:", e);
+        console.error(`🔥 Payment verification/update failed for order ${firestore_order_id}:`, e);
         // Attempt to mark the order as failed in Firestore
         try {
-            await admin.firestore().collection('orders').doc(firestore_order_id).update({
+            await orderRef.update({
                 status: 'failed',
                 paymentStatus: 'verification-failed',
                 error_message: `Payment verification failed: ${e.message}`,
