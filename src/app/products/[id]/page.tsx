@@ -111,13 +111,13 @@ export default function ProductDetailPage() {
   }, [productId]);
   
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product) return false;
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
       toast({
         variant: "destructive",
         title: "Please select a size",
       });
-      return;
+      return false;
     }
 
     addToCart({ 
@@ -127,7 +127,16 @@ export default function ProductDetailPage() {
       image: product.images[0],
       size: selectedSize || 'One Size'
     });
+    return true;
   }
+
+  const handleBuyNow = () => {
+    const added = handleAddToCart();
+    if(added) {
+        router.push('/checkout');
+    }
+  }
+
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -261,16 +270,27 @@ export default function ProductDetailPage() {
             <span className="text-sm font-medium text-primary hover:underline">Click to read full description</span>
           </button>
           
-          <div className="flex items-center gap-4 mt-8">
+          <div className="flex items-stretch gap-4 mt-8">
             <Button
               size="lg"
-              className="w-full md:w-auto"
-              onClick={handleAddToCart}
+              variant="outline"
+              className="flex-1"
+              onClick={() => handleAddToCart()}
               disabled={!product.stock}
             >
               {product.stock ? 'Add to Cart' : 'Out of Stock'}
             </Button>
-            <Button size="icon" variant="outline" onClick={handleShare}>
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={handleBuyNow}
+              disabled={!product.stock}
+            >
+              {product.stock ? 'Buy Now' : 'Out of Stock'}
+            </Button>
+          </div>
+          <div className="flex items-center justify-center mt-4">
+            <Button size="icon" variant="ghost" className="rounded-full" onClick={handleShare}>
               <Share2 className="h-5 w-5" />
               <span className="sr-only">Share</span>
             </Button>
@@ -321,3 +341,5 @@ export default function ProductDetailPage() {
     </>
   );
 }
+
+    
