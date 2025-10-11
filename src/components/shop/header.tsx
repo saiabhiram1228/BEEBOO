@@ -129,6 +129,7 @@ export default function Header() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => router.push('/order-history')}>Order History</DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleContactClick}>Contact Us</DropdownMenuItem>
                 {isAdmin && <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>Dashboard</DropdownMenuItem>}
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>

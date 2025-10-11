@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product } from './types';
+import type { Product, Order } from './types';
 import admin, { initAdmin } from './firebase/server';
 import { Timestamp } from 'firebase-admin/firestore';
 
@@ -118,3 +118,20 @@ export const getFeaturedProducts = async (limitCount?: number): Promise<Product[
     const querySnapshot = await productsQuery.get();
     return querySnapshot.docs.map(productFromDoc);
 };
+
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+    await initAdmin();
+    const adminDb = admin.firestore();
+    const ordersRef = adminDb.collection('orders');
+    const q = ordersRef.where('userId', '==', userId).orderBy('createdAt', 'desc');
+    const querySnapshot = await q.get();
+
+    return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            createdAt: (data.createdAt as Timestamp).toDate(),
+        } as Order;
+    });
+}
