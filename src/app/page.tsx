@@ -7,21 +7,42 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import ProductSection from '@/components/shop/product-section';
 import type { Product } from '@/lib/types';
 
+// Helper function to shuffle an array
+function shuffle<T>(array: T[]): T[] {
+  let currentIndex = array.length,  randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+
 export default async function HomePage() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero');
 
   // Fetch products for each section concurrently
-  const [
+  let [
     featuredProducts, 
     unisexProducts, 
     menProducts, 
     womenProducts
   ]: [Product[], Product[], Product[], Product[]] = await Promise.all([
-    getFeaturedProducts(4),
+    getFeaturedProducts(), // Fetch all featured products
     getProducts({ category: 'unisex-apparel', limit: 4 }),
     getProducts({ category: 'men-tops', limit: 4 }),
     getProducts({ category: 'women-tops', limit: 4 })
   ]);
+
+  // Shuffle the featured products and take the first 4
+  featuredProducts = shuffle(featuredProducts).slice(0, 4);
 
   const categoryLinks = [
     { name: 'All Products', href: '/products' },

@@ -35,6 +35,24 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import ProductCard from '@/components/shop/product-card';
 
+// Helper function to shuffle an array
+function shuffle<T>(array: T[]): T[] {
+  let currentIndex = array.length,  randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+
 export default function ProductDetailPage() {
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -64,11 +82,12 @@ export default function ProductDetailPage() {
       
       // Fetch related products from the same category
       if (fetchedProduct?.category) {
-        // Fetch 5 products to have enough to show 4 after filtering.
-        const fetchedRelated = await getProducts({ category: fetchedProduct.category, limit: 5 });
-        // Filter out the current product from the related list
-        if (fetchedRelated && fetchedRelated.products) {
-          setRelatedProducts(fetchedRelated.products.filter(p => p.id !== fetchedProduct.id).slice(0, 4));
+        // Fetch more products to have enough to show 4 after filtering and shuffling.
+        const fetchedRelated = await getProducts({ category: fetchedProduct.category, limit: 10 });
+        // Filter out the current product from the related list and shuffle
+        if (fetchedRelated) {
+          const shuffled = shuffle(fetchedRelated.filter(p => p.id !== fetchedProduct.id));
+          setRelatedProducts(shuffled.slice(0, 4));
         }
       }
 
