@@ -5,7 +5,6 @@ import admin, { initAdmin } from './firebase/server';
 import { Timestamp } from 'firebase-admin/firestore';
 import type { CartItem, ShippingDetails, Order } from './types';
 import crypto from 'crypto';
-import { sendOrderConfirmationEmail } from './email';
 
 // This function now handles the full Razorpay flow without webhooks.
 export async function createOrderAndPayment(orderPayload: { cart: CartItem[], shippingDetails: ShippingDetails, total: number }, userId: string) {
@@ -30,9 +29,6 @@ export async function createOrderAndPayment(orderPayload: { cart: CartItem[], sh
             };
             const docRef = await adminDb.collection('orders').add({ ...simOrderData, createdAt: Timestamp.fromDate(simOrderData.createdAt) });
             
-             // Send confirmation email for simulated order
-            await sendOrderConfirmationEmail(shippingDetails, { id: docRef.id, ...simOrderData });
-
             return { data: { id: docRef.id, isDirectOrder: true }, error: null };
         }
 
@@ -61,13 +57,17 @@ export async function createOrderAndPayment(orderPayload: { cart: CartItem[], sh
 
         // 2. Create the order with Razorpay
         const amountInPaise = Math.round(total * 100);
+        const productNames = cart.map((i) => `${i.name} (${i.size}) x${i.quantity}`).join(", ");
         const options = {
             amount: amountInPaise,
             currency: 'INR',
             receipt: firestoreOrderId,
-            notes: { 
+            notes: {
                 firestore_order_id: firestoreOrderId,
                 user_id: userId,
+                customer_name: shippingDetails.name,
+                customer_email: shippingDetails.email,
+                items: productNames,
             },
             partial_payment: false,
         };
@@ -137,15 +137,12 @@ export async function verifyPaymentAndUpdateOrder(
             .digest('hex');
 
         if (generated_signature !== razorpay_signature) {
+            console.error('Payment verification failed: Invalid signature.', {
+                generated: generated_signature,
+                received: razorpay_signature,
+            });
             throw new Error('Payment verification failed: Invalid signature.');
         }
-
-        // Fetch the order data to use for the email
-        const orderSnapshot = await orderRef.get();
-        if (!orderSnapshot.exists) {
-            throw new Error(`Order ${firestore_order_id} not found in Firestore.`);
-        }
-        const orderData = orderSnapshot.data() as Omit<Order, 'id'>;
 
         // Update Firestore
         await orderRef.update({
@@ -154,15 +151,6 @@ export async function verifyPaymentAndUpdateOrder(
             razorpayPaymentId: razorpay_payment_id,
             razorpaySignature: razorpay_signature,
         });
-
-        // Send confirmation email
-        await sendOrderConfirmationEmail(orderData.shippingAddress, {
-            id: firestore_order_id,
-            total: orderData.total,
-            products: orderData.products,
-            razorpayPaymentId: razorpay_payment_id,
-        });
-
 
         return { success: true, orderId: firestore_order_id };
     } catch (e: any) {
