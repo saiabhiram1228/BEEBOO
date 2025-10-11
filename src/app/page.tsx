@@ -95,7 +95,7 @@ export default async function HomePage() {
         </div>
       </section>
       
-      <ProductSection title="Featured Products" products={featuredProducts} showMoreHref="/products" />
+      <ProductSection title="Trending Premium Collections" products={featuredProducts} showMoreHref="/products" />
       <ProductSection title="Unisex" products={unisexProducts} showMoreHref="/products?category=unisex-apparel" />
       <ProductSection title="Men" products={menProducts} showMoreHref="/products?category=men-tops" />
       <ProductSection title="Women" products={womenProducts} showMoreHref="/products?category=women-tops" />
