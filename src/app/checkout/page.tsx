@@ -42,7 +42,7 @@ declare global {
 }
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, total, subtotal, shippingFee, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
         const orderPayload = {
             cart: cart.map(item => ({...item, productId: item.id})), // Pass full cart item details
             shippingDetails: data,
-            total: cartTotal,
+            total: total,
         };
 
         const response = await fetch('/api/create-order', {
@@ -293,7 +293,7 @@ export default function CheckoutPage() {
                   </div>
                   
                   <Button type="submit" size="lg" className="w-full mt-6" variant="outline" disabled={isSubmitting || !razorpayLoaded}>
-                    {isSubmitting ? <span className="flex items-center"><LoadingLogo className="mr-2 h-5 w-5" />Processing...</span> : `Proceed to Pay - ₹${cartTotal.toFixed(2)}`}
+                    {isSubmitting ? <span className="flex items-center"><LoadingLogo className="mr-2 h-5 w-5" />Processing...</span> : `Proceed to Pay - ₹${total.toFixed(2)}`}
                   </Button>
                   {!razorpayLoaded && <p className="text-center text-sm text-muted-foreground mt-2">Loading payment gateway...</p>}
                 </form>
@@ -323,16 +323,16 @@ export default function CheckoutPage() {
               <Separator />
               <div className="flex justify-between font-semibold">
                 <p>Subtotal</p>
-                <p>₹{cartTotal.toFixed(2)}</p>
+                <p>₹{subtotal.toFixed(2)}</p>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <p>Shipping</p>
-                <p>Free</p>
+                <p>₹{shippingFee.toFixed(2)}</p>
               </div>
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <p>Total</p>
-                <p>₹{cartTotal.toFixed(2)}</p>
+                <p>₹{total.toFixed(2)}</p>
               </div>
             </CardContent>
           </Card>

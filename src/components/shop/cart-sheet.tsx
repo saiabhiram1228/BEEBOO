@@ -21,7 +21,7 @@ import AiRecommendations from './ai-recommendations';
 import { useState } from 'react';
 
 export default function CartSheet({ children }: { children: React.ReactNode }) {
-  const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { cart, updateQuantity, removeFromCart, total } = useCart();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -91,7 +91,7 @@ export default function CartSheet({ children }: { children: React.ReactNode }) {
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
                         <span>Subtotal</span>
-                        <span>₹{cartTotal.toFixed(2)}</span>
+                        <span>₹{total.toFixed(2)}</span>
                     </div>
                     <Button asChild size="lg" className="w-full" variant="outline">
                         <Link href="/checkout" onClick={() => setIsOpen(false)}>Proceed to Checkout</Link>

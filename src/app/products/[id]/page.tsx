@@ -301,10 +301,6 @@ export default function ProductDetailPage() {
                     <span>Delivery within 1 week</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Truck className="h-5 w-5" />
-                    <span>Free Delivery</span>
-                </div>
-                <div className="flex items-center gap-2">
                     <Paintbrush className="h-5 w-5" />
                     <span>Reach out to us for custom designs</span>
                 </div>
@@ -341,5 +337,3 @@ export default function ProductDetailPage() {
     </>
   );
 }
-
-    
